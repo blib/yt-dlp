@@ -63,7 +63,7 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
     _VALID_URL = rf'{YandexMusicBaseIE._VALID_URL_BASE}/album/(?P<album_id>\d+)/track/(?P<id>\d+)'
 
     _TESTS = [{
-        'url': 'http://music.yandex.ru/album/540508/track/4878838',
+        'url': 'https://music.yandex.ru/album/540508/track/4878838',
         'md5': 'dec8b661f12027ceaba33318787fff76',
         'info_dict': {
             'id': '4878838',
@@ -80,7 +80,7 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
         # 'skip': 'Travis CI servers blocked by YandexMusic',
     }, {
         # multiple disks
-        'url': 'http://music.yandex.ru/album/3840501/track/705105',
+        'url': 'https://music.yandex.ru/album/3840501/track/705105',
         'md5': '82a54e9e787301dd45aba093cf6e58c0',
         'info_dict': {
             'id': '705105',
@@ -99,7 +99,7 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
         },
         # 'skip': 'Travis CI servers blocked by YandexMusic',
     }, {
-        'url': 'http://music.yandex.com/album/540508/track/4878838',
+        'url': 'https://music.yandex.com/album/540508/track/4878838',
         'only_matching': True,
     }]
 
@@ -117,18 +117,18 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
             track_id, 'Downloading track location url JSON', query={'hq': 1}, headers={'X-Retpath-Y': url})
 
         fd_data = self._download_json(
-            download_data['src'], track_id,
+            self._proto_relative_url(download_data['src'], scheme='https:'), track_id,
             'Downloading track location JSON',
             query={'format': 'json'})
         key = hashlib.md5(('XGRlBW9FXlekgbPrRHuSiA' + fd_data['path'][1:] + fd_data['s']).encode()).hexdigest()
-        f_url = 'http://{}/get-mp3/{}/{}?track-id={} '.format(fd_data['host'], key, fd_data['ts'] + fd_data['path'], track['id'])
+        f_url = 'https://{}/get-mp3/{}/{}?track-id={} '.format(fd_data['host'], key, fd_data['ts'] + fd_data['path'], track['id'])
 
         thumbnail = None
         cover_uri = track.get('albums', [{}])[0].get('coverUri')
         if cover_uri:
             thumbnail = cover_uri.replace('%%', 'orig')
             if not thumbnail.startswith('http'):
-                thumbnail = 'http://' + thumbnail
+                thumbnail = 'https://' + thumbnail
 
         track_info = {
             'id': track_id,
@@ -244,7 +244,7 @@ class YandexMusicPlaylistBaseIE(YandexMusicBaseIE):
             if not album_id:
                 continue
             entries.append(self.url_result(
-                f'http://music.yandex.ru/album/{album_id}/track/{track_id}',
+                f'https://music.yandex.ru/album/{album_id}/track/{track_id}',
                 ie=YandexMusicTrackIE.ie_key(), video_id=track_id))
         return entries
 
@@ -255,7 +255,7 @@ class YandexMusicAlbumIE(YandexMusicPlaylistBaseIE):
     _VALID_URL = rf'{YandexMusicBaseIE._VALID_URL_BASE}/album/(?P<id>\d+)'
 
     _TESTS = [{
-        'url': 'http://music.yandex.ru/album/540508',
+        'url': 'https://music.yandex.ru/album/540508',
         'info_dict': {
             'id': '540508',
             'title': 'md5:7ed1c3567f28d14be9f61179116f5571',
@@ -312,7 +312,7 @@ class YandexMusicPlaylistIE(YandexMusicPlaylistBaseIE):
     _VALID_URL = rf'{YandexMusicBaseIE._VALID_URL_BASE}/users/(?P<user>[^/]+)/playlists/(?P<id>\d+)'
 
     _TESTS = [{
-        'url': 'http://music.yandex.ru/users/music.partners/playlists/1245',
+        'url': 'https://music.yandex.ru/users/music.partners/playlists/1245',
         'info_dict': {
             'id': '1245',
             'title': 'md5:841559b3fe2b998eca88d0d2e22a3097',
@@ -446,7 +446,7 @@ class YandexMusicArtistAlbumsIE(YandexMusicArtistBaseIE):
             if not album_id:
                 continue
             entries.append(self.url_result(
-                f'http://music.yandex.ru/album/{album_id}',
+                f'https://music.yandex.ru/album/{album_id}',
                 ie=YandexMusicAlbumIE.ie_key(), video_id=album_id))
         artist = try_get(data, lambda x: x['artist']['name'], str)
         title = '{} - {}'.format(artist or artist_id, 'Альбомы')
